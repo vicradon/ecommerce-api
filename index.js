@@ -1,12 +1,10 @@
 import express from "express";
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
-import { createOrder } from "./controllers/order";
-import { createProduct, getAllProducts } from "./controllers/product";
 import authRouter from "./routes/auth";
 import { errorHandler } from "./middleware/errorHandler";
-
-const prisma = new PrismaClient();
+import orderRouter from "./routes/order";
+import productRouter from "./routes/product";
+import allowIfLoggedin from "./middleware/allowIfLoggedIn";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -19,20 +17,9 @@ app.get("/", (_, res) => {
 
 app.use("/api/v1/auth", authRouter);
 
-app.post("/orders", async (req, res) => {
-  const result = createOrder(5);
-  res.send(result);
-});
-
-app.post("/products", async (req, res) => {
-  const result = await createProduct("Mattres", "2x2 mattress for sleeping");
-  res.send(result);
-});
-
-app.get("/products", async (req, res) => {
-  const products = await getAllProducts();
-  res.send(products);
-});
+app.use(allowIfLoggedin);
+app.use("/api/v1/orders", orderRouter);
+app.use("/api/v1/products", productRouter);
 
 app.use(errorHandler);
 

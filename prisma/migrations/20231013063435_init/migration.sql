@@ -3,7 +3,9 @@ CREATE TABLE "User" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "name" TEXT,
+    "isAdmin" BOOLEAN NOT NULL DEFAULT false,
+    "firstName" TEXT,
+    "lastName" TEXT,
     "salt" TEXT
 );
 
@@ -21,7 +23,9 @@ CREATE TABLE "Order" (
 CREATE TABLE "Product" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "name" TEXT NOT NULL,
-    "description" TEXT
+    "description" TEXT,
+    "userId" INTEGER,
+    CONSTRAINT "Product_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 -- CreateIndex

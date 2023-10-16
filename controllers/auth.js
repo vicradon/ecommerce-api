@@ -5,7 +5,8 @@ import { generateSalt, hashPassword, verifyPassword } from "../utils/password";
 import { exclude } from "../utils/user";
 
 const signupSchema = Joi.object({
-  name: Joi.string().alphanum().required(),
+  firstName: Joi.string().alphanum(),
+  lastName: Joi.string().alphanum(),
   email: Joi.string().email().required(),
   password: Joi.string().required(),
 });
@@ -16,12 +17,11 @@ const loginSchema = Joi.object({
 });
 
 export const signup = async (req, res, next) => {
-  const { email, password, name } = req.body;
+  const { email, password, firstName, lastName } = req.body;
 
-  try {
-    signupSchema.validate(req.body);
-  } catch (error) {
-    next(error);
+  const schemaRes = signupSchema.validate(req.body);
+  if (schemaRes.error) {
+    return res.json(schemaRes.error.details);
   }
 
   const userExists = await prisma.user.findFirst({ where: { email } });
@@ -36,7 +36,8 @@ export const signup = async (req, res, next) => {
     data: {
       email,
       password: hashedPassword,
-      name,
+      firstName,
+      lastName,
       salt,
     },
   });
@@ -51,10 +52,9 @@ export const signup = async (req, res, next) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
-  try {
-    loginSchema.validate(req.body);
-  } catch (error) {
-    next(error);
+  const schemaRes = loginSchema.validate(req.body);
+  if (schemaRes.error) {
+    return res.json(schemaRes.error.details);
   }
 
   const user = await prisma.user.findFirst({ where: { email } });
